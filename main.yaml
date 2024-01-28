@@ -18,6 +18,8 @@
 {{- $toolset := .toolset }}
 {{- $username := .username }}
 
+{{- $keyboard_layout := .keyboard_layout }}
+
 architecture: {{ $arch }}
 
 actions:
@@ -39,6 +41,7 @@ actions:
       timezone: {{ $timezone }}
       toolset: {{ $toolset }}
       username: {{ $username }}
+      keyboard_layout: {{ $keyboard_layout }}
 {{ end }}
 
 {{ if $imagename }}

@@ -9,6 +9,7 @@
 {{- $timezone := .timezone }}
 {{- $toolset := .toolset }}
 {{- $username := .username }}
+{{- $keyboard_layout := .keyboard_layout }}
 
 {{- $hostname := or .hostname "kali" }}
 
@@ -78,10 +79,10 @@ actions:
   - action: overlay
     source: overlays/loopback-interface
     
-  - description: "Set keyboard layout to FR"
+  - description: "Set keyboard layout to {{ $keyboard_layout }}"
     action: run
     chroot: true
-    command: sed -i "/XKBLAYOUT=/c\XKBLAYOUT='fr'" /etc/default/keyboard
+    command: sed -i "/XKBLAYOUT=/c\XKBLAYOUT='{{ $keyboard_layout }}'" /etc/default/keyboard
 
   - description: "Create user {{ $username }}"
     action: run

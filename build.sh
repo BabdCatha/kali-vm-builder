@@ -22,6 +22,7 @@ DEFAULT_ARCH=amd64
 DEFAULT_BRANCH=kali-rolling
 DEFAULT_DESKTOP=xfce
 DEFAULT_LOCALE=en_US.UTF-8
+DEFAULT_KEYBOARD_LAYOUT=us
 DEFAULT_MIRROR=http://http.kali.org/kali
 DEFAULT_TIMEZONE=America/New_York
 DEFAULT_TOOLSET=default
@@ -34,6 +35,7 @@ DESKTOP=
 FORMAT=
 KEEP=false
 LOCALE=
+KEYBOARD_LAYOUT=
 MIRROR=
 PACKAGES=
 PASSWORD=
@@ -209,6 +211,7 @@ create_vm() {
         -t username:$USERNAME \
         -t variant:$VARIANT \
         -t zip:$ZIP \
+        -t keyboard_layout:$KEYBOARD_LAYOUT \
         main.yaml
 }
 
@@ -237,6 +240,7 @@ Customization options:
   -D DESKTOP  Desktop environment installed in the image, default: $(b $DEFAULT_DESKTOP)
               Supported values: $SUPPORTED_DESKTOPS
   -L LOCALE   Set locale, default: $(b $DEFAULT_LOCALE)
+  -K KEYBOARD Set keyboard layout, default: $(b $DEFAULT_KEYBOARD_LAYOUT)
   -P PACKAGES Install extra packages (comma/space separated list)
   -T TOOLSET  The selection of tools to include in the image, default: $(b $(default_toolset))
               Supported values: $SUPPORTED_TOOLSETS
@@ -273,7 +277,7 @@ Most useful debos options:
 Refer to the README.md for examples
 "
 
-while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:" opt; do
+while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:K:" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -292,6 +296,7 @@ while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:" opt; do
         (x) VERSION=$OPTARG ;;
         (z) ZIP=true ;;
         (Z) TIMEZONE=$OPTARG ;;
+        (K) KEYBOARD_LAYOUT=$OPTARG ;;
         (*) echo "$USAGE" 1>&2; exit 1 ;;
     esac
 done
@@ -309,6 +314,7 @@ if [ "$ROOTFS" ]; then
     [ "$BRANCH"   ] && fail_mismatch -b -r
     [ "$DESKTOP"  ] && fail_mismatch -D -r
     [ "$LOCALE"   ] && fail_mismatch -L -r
+    [ "$KEYBOARD_LAYOUT" ] && fail_mismatch -K -r
     [ "$MIRROR"   ] && fail_mismatch -m -r
     [ "$TIMEZONE" ] && fail_mismatch -Z -r
     [ "$TOOLSET"  ] && fail_mismatch -T -r
@@ -325,6 +331,7 @@ else
     [ "$BRANCH"   ] || BRANCH=$DEFAULT_BRANCH
     [ "$DESKTOP"  ] || DESKTOP=$DEFAULT_DESKTOP
     [ "$LOCALE"   ] || LOCALE=$DEFAULT_LOCALE
+    [ "$KEYBOARD_LAYOUT" ] || KEYBOARD_LAYOUT=$DEFAULT_KEYBOARD_LAYOUT
     [ "$MIRROR"   ] || MIRROR=$DEFAULT_MIRROR
     [ "$TIMEZONE" ] || TIMEZONE=$DEFAULT_TIMEZONE
     [ "$TOOLSET"  ] || TOOLSET=$(default_toolset)
@@ -471,6 +478,7 @@ echo "# Build options:"
 [ "$PACKAGES" ] && point "additional packages: $(b $PACKAGES)"
 [ "$USERNAME" ] && point "username & password: $(b $USERNAME $PASSWORD)"
 [ "$LOCALE"   ] && point "locale: $(b $LOCALE)"
+[ "$KEYBOARD_LAYOUT" ] && point "keyboard layout: $(b $KEYBOARD_LAYOUT)"
 [ "$TIMEZONE" ] && point "timezone: $(b $TIMEZONE)"
 [ "$KEEP"     ] && point "keep temporary files: $(b $KEEP)"
 } \
