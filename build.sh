@@ -21,6 +21,7 @@ SUPPORTED_VARIANTS="generic hyperv qemu rootfs virtualbox vmware"
 DEFAULT_ARCH=amd64
 DEFAULT_BRANCH=kali-rolling
 DEFAULT_DESKTOP=xfce
+DEFAULT_HOSTNAME=kali
 DEFAULT_LOCALE=en_US.UTF-8
 DEFAULT_KEYBOARD_LAYOUT=us
 DEFAULT_MIRROR=http://http.kali.org/kali
@@ -38,6 +39,7 @@ LOCALE=
 KEYBOARD_LAYOUT=
 MIRROR=
 PACKAGES=
+HOSTNAME=
 PASSWORD=
 ROOTFS=
 SIZE=86
@@ -197,6 +199,7 @@ create_vm() {
         -t branch:$BRANCH \
         -t desktop:$DESKTOP \
         -t format:$FORMAT \
+        -t hostname:$HOSTNAME \
         -t imagename:$IMAGENAME \
         -t imagesize:$SIZE \
         -t keep:$KEEP \
@@ -239,6 +242,7 @@ Build options:
 Customization options:
   -D DESKTOP  Desktop environment installed in the image, default: $(b $DEFAULT_DESKTOP)
               Supported values: $SUPPORTED_DESKTOPS
+  -H HOSTNAME Set system host name, default: $(b $DEFAULT_HOSTNAME)
   -L LOCALE   Set locale, default: $(b $DEFAULT_LOCALE)
   -K KEYBOARD Set keyboard layout, default: $(b $DEFAULT_KEYBOARD_LAYOUT)
   -P PACKAGES Install extra packages (comma/space separated list)
@@ -277,7 +281,7 @@ Most useful debos options:
 Refer to the README.md for examples
 "
 
-while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:K:" opt; do
+while getopts ":a:b:D:f:hH:kL:m:P:r:s:T:U:v:x:zZ:K:" opt; do
     case $opt in
         (a) ARCH=$OPTARG ;;
         (b) BRANCH=$OPTARG ;;
@@ -287,6 +291,7 @@ while getopts ":a:b:D:f:hkL:m:P:r:s:T:U:v:x:zZ:K:" opt; do
         (k) KEEP=true ;;
         (L) LOCALE=$OPTARG ;;
         (m) MIRROR=$OPTARG ;;
+        (H) HOSTNAME=$OPTARG ;;
         (P) PACKAGES="$PACKAGES $OPTARG" ;;
         (r) ROOTFS=$OPTARG ;;
         (s) SIZE=$OPTARG ;;
@@ -313,6 +318,7 @@ if [ "$ROOTFS" ]; then
     [ "$ARCH"     ] && fail_mismatch -a -r
     [ "$BRANCH"   ] && fail_mismatch -b -r
     [ "$DESKTOP"  ] && fail_mismatch -D -r
+    [ "$HOSTNAME" ] && fail_mismatch -H -r
     [ "$LOCALE"   ] && fail_mismatch -L -r
     [ "$KEYBOARD_LAYOUT" ] && fail_mismatch -K -r
     [ "$MIRROR"   ] && fail_mismatch -m -r
@@ -330,6 +336,7 @@ else
     [ "$ARCH"     ] || ARCH=$DEFAULT_ARCH
     [ "$BRANCH"   ] || BRANCH=$DEFAULT_BRANCH
     [ "$DESKTOP"  ] || DESKTOP=$DEFAULT_DESKTOP
+    [ "$HOSTNAME" ] || HOSTNAME=$DEFAULT_HOSTNAME
     [ "$LOCALE"   ] || LOCALE=$DEFAULT_LOCALE
     [ "$KEYBOARD_LAYOUT" ] || KEYBOARD_LAYOUT=$DEFAULT_KEYBOARD_LAYOUT
     [ "$MIRROR"   ] || MIRROR=$DEFAULT_MIRROR
@@ -477,6 +484,7 @@ echo "# Build options:"
 [ "$TOOLSET"  ] && point "tool selection: $(b $TOOLSET)"
 [ "$PACKAGES" ] && point "additional packages: $(b $PACKAGES)"
 [ "$USERNAME" ] && point "username & password: $(b $USERNAME $PASSWORD)"
+[ "$HOSTNAME" ] && point "hostname: $(b $HOSTNAME)"
 [ "$LOCALE"   ] && point "locale: $(b $LOCALE)"
 [ "$KEYBOARD_LAYOUT" ] && point "keyboard layout: $(b $KEYBOARD_LAYOUT)"
 [ "$TIMEZONE" ] && point "timezone: $(b $TIMEZONE)"
