@@ -11,7 +11,7 @@
 {{- $username := .username }}
 {{- $keyboard_layout := .keyboard_layout }}
 
-{{- $hostname := or .hostname "kali" }}
+{{- $hostname := .hostname }}
 
 architecture: {{ $arch }}
 

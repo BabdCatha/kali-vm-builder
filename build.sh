@@ -108,6 +108,16 @@ in_list() {
     return 1
 }
 
+valid_hostname() {
+    # Cf. hostname(7) and netcfg/netcfg-common.c from debian-installer
+    local name=$1
+    [[ $name =~ ^[A-Za-z0-9-]+$ ]] \
+        || return 1
+    [[ $name =~ ^-|-$ ]] \
+        && return 1
+    return 0
+}
+
 kali_message() {
     local line=
     echo "┏━━($(b $@))"
@@ -174,50 +184,6 @@ ask_confirmation() {
     esac
     echo ""
 }
-
-# create_vm
-create_vm() {
-    mkdir -pv "$OUTDIR/"
-    rm -fv "$OUTDIR/.artifacts"
-
-    # Filename structure for final file
-    OUTPUT=kali-linux-$VERSION-$VARIANT-$ARCH
-
-    if [ $VARIANT = rootfs ]; then
-        ROOTFS=rootfs-$VERSION-$ARCH
-        IMAGENAME=
-    elif [ "$ROOTFS" ]; then
-        ROOTFS=${ROOTFS%.tar.*}
-        IMAGENAME=$OUTPUT
-    else
-        ROOTFS=
-        IMAGENAME=$OUTPUT
-    fi
-
-    debos "$@" \
-        -t arch:$ARCH \
-        -t branch:$BRANCH \
-        -t desktop:$DESKTOP \
-        -t format:$FORMAT \
-        -t hostname:$HOSTNAME \
-        -t imagename:$IMAGENAME \
-        -t imagesize:$SIZE \
-        -t keep:$KEEP \
-        -t locale:$LOCALE \
-        -t mirror:$MIRROR \
-        -t packages:"$PACKAGES" \
-        -t password:"$PASSWORD" \
-        -t rootfs:$ROOTFS \
-        -t timezone:$TIMEZONE \
-        -t toolset:$TOOLSET \
-        -t uefi:$UEFI \
-        -t username:$USERNAME \
-        -t variant:$VARIANT \
-        -t zip:$ZIP \
-        -t keyboard_layout:$KEYBOARD_LAYOUT \
-        main.yaml
-}
-
 
 USAGE="Usage: $(basename $0) <options> [-- <debos options>]
 
@@ -353,6 +319,9 @@ else
         || fail_invalid -v $DESKTOP
     in_list $TOOLSET $SUPPORTED_TOOLSETS \
         || fail_invalid -v $TOOLSET
+    # Validate hostname, cf. hostname(7)
+    valid_hostname "$HOSTNAME" \
+        || fail_invalid -H "$HOSTNAME" "must contain only letters, digits and hyphens"
     # Unpack USERPASS to USERNAME and PASSWORD
     echo $USERPASS | grep -q ":" \
         || fail_invalid -U $USERPASS "must be of the form <username>:<password>"
@@ -497,7 +466,45 @@ ask_confirmation \
     || { echo "Abort"; exit 1; }
 
 # Build
-create_vm "$@"
+mkdir -pv "$OUTDIR/"
+rm -fv "$OUTDIR/.artifacts"
+
+# Filename structure for final file
+OUTPUT=kali-linux-$VERSION-$VARIANT-$ARCH
+
+if [ $VARIANT = rootfs ]; then
+    ROOTFS=rootfs-$VERSION-$ARCH
+    IMAGENAME=
+elif [ "$ROOTFS" ]; then
+    ROOTFS=${ROOTFS%.tar.*}
+    IMAGENAME=$OUTPUT
+else
+    ROOTFS=
+    IMAGENAME=$OUTPUT
+fi
+
+debos "$@" \
+    -t arch:$ARCH \
+    -t branch:$BRANCH \
+    -t desktop:$DESKTOP \
+    -t format:$FORMAT \
+    -t hostname:$HOSTNAME \
+    -t imagename:$IMAGENAME \
+    -t imagesize:$SIZE \
+    -t keep:$KEEP \
+    -t locale:$LOCALE \
+    -t mirror:$MIRROR \
+    -t packages:"$PACKAGES" \
+    -t password:"$PASSWORD" \
+    -t rootfs:$ROOTFS \
+    -t timezone:$TIMEZONE \
+    -t toolset:$TOOLSET \
+    -t uefi:$UEFI \
+    -t username:$USERNAME \
+    -t variant:$VARIANT \
+    -t zip:$ZIP \
+    -t keyboard_layout:$KEYBOARD_LAYOUT \
+    main.yaml
 
 # Finish
 cat << EOF
