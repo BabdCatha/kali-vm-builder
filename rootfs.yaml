@@ -72,6 +72,11 @@ actions:
     packages: [ {{ $packages }} ]
 {{ end }}
 
+  - description: "Install custom packages"
+    action: run
+    chroot: true
+    script: scripts/install-custom-packages.sh
+
   - action: overlay
     source: overlays/loopback-interface
     
